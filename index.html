@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>SKEED PAY</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #0b132b;
+      --card-bg: #1c2541;
+      --accent: #3a86ff;
+      --accent-hover: #2563eb;
+      --text: #ffffff;
+      --text-muted: #8d99ae;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .card h2 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: #0b132b;
+      border: 1px solid #3a4768;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.2s;
+    }
+
+    .btn:active {
+      background: var(--accent-hover);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+      font-weight: 600;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>SKEED PAY</h1>
+    <span id="user-badge" class="status-badge">Клиент</span>
+  </div>
+
+  <div class="card">
+    <h2>Реквизиты выплат</h2>
+    <p>Укажите ваш кошелек в сети USDT TRC20 для начислений за просмотры:</p>
+    <input type="text" id="wallet-input" class="input-field" placeholder="T..." maxlength="34">
+    <button class="btn" id="save-wallet-btn">Сохранить кошелек</button>
+  </div>
+
+  <div class="card">
+    <h2>Отправить нарезку на проверку</h2>
+    <p>Поддерживаются ролики YouTube Shorts и TikTok:</p>
+    <input type="url" id="clip-url" class="input-field" placeholder="https://youtube.com/shorts/...">
+    <button class="btn" id="send-clip-btn">Отправить отчет</button>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // Получаем данные о текущем пользователе из Telegram
+    const user = tg.initDataUnsafe?.user;
+    if (user && user.first_name) {
+      document.getElementById('user-badge').innerText = user.first_name;
+    }
+
+    // Отправка кошелька боту
+    document.getElementById('save-wallet-btn').addEventListener('click', () => {
+      const wallet = document.getElementById('wallet-input').value.trim();
+      if (!wallet.startsWith('T') || wallet.length !== 34) {
+        tg.showAlert('Пожалуйста, укажите корректный USDT TRC20 адрес (начинается с T, длина 34 символа).');
+        return;
+      }
+      tg.sendData(JSON.stringify({ type: 'save_wallet', wallet: wallet }));
+    });
+
+    // Отправка клипа боту
+    document.getElementById('send-clip-btn').addEventListener('click', () => {
+      const url = document.getElementById('clip-url').value.trim();
+      if (!url.includes('tiktok.com') && !url.includes('youtube.com') && !url.includes('youtu.be')) {
+        tg.showAlert('Ссылка должна вести на TikTok или YouTube Shorts.');
+        return;
+      }
+      tg.sendData(JSON.stringify({ type: 'submit_clip', url: url }));
+    });
+  </script>
+</body>
+</html>
