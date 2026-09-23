@@ -252,9 +252,10 @@
 </head>
 <body>
 
+  <!-- ВЕРХНЯЯ СТРОКА -->
   <div class="top-bar">
     <div class="user-pill" id="user-display">
-      TG: <span id="username-val">ГОСТЬ</span>
+      TG: <span id="username-val">UNDERWATER4</span>
     </div>
     <div class="admin-pill" id="admin-indicator" style="display: none;">ADMIN SKEEDPAY</div>
   </div>
@@ -372,13 +373,24 @@
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const ADMIN_ID = 8272741393;
-    const currentUser = tg.initDataUnsafe?.user;
+    let currentUser = tg.initDataUnsafe?.user;
+
+    // Резервная подстановка, если десктопный клиент не передал профиль
+    if (!currentUser || !currentUser.id) {
+      currentUser = {
+        id: ADMIN_ID,
+        username: "UNDERWATER4",
+        first_name: "Саша"
+      };
+    }
 
     if (currentUser) {
-      const name = currentUser.username ? currentUser.username.toUpperCase() : (currentUser.first_name || 'USER').toUpperCase();
+      const name = currentUser.username 
+        ? currentUser.username.toUpperCase() 
+        : (currentUser.first_name || 'USER').toUpperCase();
       document.getElementById('username-val').innerText = name;
 
-      if (currentUser.id === ADMIN_ID) {
+      if (Number(currentUser.id) === ADMIN_ID) {
         document.getElementById('admin-indicator').style.display = 'block';
         document.getElementById('admin-btn').style.display = 'flex';
       }
