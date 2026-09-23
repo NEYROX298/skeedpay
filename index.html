@@ -2,135 +2,344 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>SKEED PAY</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SKEEDPAY SYSTEM 2026</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b132b;
-      --card-bg: #1c2541;
-      --accent: #3a86ff;
-      --accent-hover: #2563eb;
-      --text: #ffffff;
-      --text-muted: #8d99ae;
-      --success: #10b981;
+      --bg-color: #0d1117;
+      --card-white: #ffffff;
+      --card-disabled: #21262d;
+      --card-admin: #ef4444;
+      --accent-blue: #3b82f6;
+      --text-dark: #0d1117;
+      --text-light: #ffffff;
+      --text-muted: #6e7681;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Montserrat', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background-color: var(--bg);
-      color: var(--text);
-      padding: 16px;
+      background-color: var(--bg-color);
+      color: var(--text-light);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      justify-content: space-between;
+      overflow-x: hidden;
     }
 
-    .header {
+    /* Верхняя панель */
+    .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 14px 20px;
+      width: 100%;
     }
 
-    .header h1 {
-      font-size: 20px;
+    .user-pill {
+      background: #ffffff;
+      color: #0d1117;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
       font-weight: 800;
       letter-spacing: 0.5px;
-      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
 
-    .card {
-      background: var(--card-bg);
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    .admin-pill {
+      background: #ef4444;
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
-    .card h2 {
+    /* Контейнер экранов */
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      width: 100%;
+      padding: 20px;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 440px;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Кнопки главного меню */
+    .menu-btn {
+      width: 100%;
+      background: var(--card-white);
+      color: var(--text-dark);
+      border: none;
+      border-radius: 12px;
+      padding: 18px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-size: 16px;
-      margin-bottom: 8px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      transition: transform 0.1s, opacity 0.1s;
     }
 
-    .card p {
+    .menu-btn:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    .menu-btn .btn-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .menu-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2.5;
+    }
+
+    /* Неактивная плашка */
+    .menu-btn.disabled {
+      background: var(--card-disabled);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .menu-btn.disabled:active {
+      transform: none;
+    }
+
+    /* Красная кнопка админки */
+    .menu-btn.admin {
+      background: var(--card-admin);
+      color: var(--text-light);
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Карточки разделов */
+    .content-box {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .content-box h2 {
+      font-size: 18px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .content-box p {
       font-size: 13px;
       color: var(--text-muted);
+      font-weight: 700;
       line-height: 1.4;
     }
 
-    .input-field {
+    .field {
       width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      background: #0b132b;
-      border: 1px solid #3a4768;
-      border-radius: 8px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 14px;
       color: #fff;
       font-size: 14px;
+      font-weight: 800;
       outline: none;
     }
-
-    .input-field:focus {
-      border-color: var(--accent);
+    .field:focus {
+      border-color: var(--accent-blue);
     }
 
-    .btn {
+    .action-btn {
       width: 100%;
-      padding: 14px;
-      background: var(--accent);
+      background: var(--accent-blue);
       color: #fff;
-      font-size: 15px;
-      font-weight: 700;
       border: none;
       border-radius: 10px;
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 900;
       cursor: pointer;
-      margin-top: 12px;
-      transition: background 0.2s;
+      margin-top: 4px;
+    }
+    .action-btn:active {
+      opacity: 0.85;
     }
 
-    .btn:active {
-      background: var(--accent-hover);
-    }
-
-    .status-badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--success);
-      font-weight: 600;
+    .back-btn {
+      background: transparent;
+      border: 1px solid #30363d;
+      color: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
       margin-top: 6px;
+    }
+
+    /* Футер */
+    .footer {
+      text-align: center;
+      padding: 18px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #484f58;
+      letter-spacing: 1px;
     }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>SKEED PAY</h1>
-    <span id="user-badge" class="status-badge">Клиент</span>
+  <!-- ВЕРХНЯЯ СТРОКА -->
+  <div class="top-bar">
+    <div class="user-pill" id="user-display">
+      TG: <span id="username-val">UNDERWATER4</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    </div>
+    <div class="admin-pill" id="admin-indicator" style="display: none;">ADMIN SKEEDPAY</div>
   </div>
 
-  <div class="card">
-    <h2>Реквизиты выплат</h2>
-    <p>Укажите ваш кошелек в сети USDT TRC20 для начислений за просмотры:</p>
-    <input type="text" id="wallet-input" class="input-field" placeholder="T..." maxlength="34">
-    <button class="btn" id="save-wallet-btn">Сохранить кошелек</button>
+  <div class="container">
+
+    <!-- ГЛАВНОЕ МЕНЮ -->
+    <div class="screen active" id="menu-screen">
+      <button class="menu-btn" onclick="openScreen('tasks-screen')">
+        <div class="btn-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          <span>ТАСКИ</span>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <button class="menu-btn" onclick="openScreen('help-screen')">
+        <div class="btn-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>ПОМОЩЬ</span>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <button class="menu-btn" onclick="openScreen('settings-screen')">
+        <div class="btn-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>НАСТРОЙКИ</span>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <div class="menu-btn disabled">
+        <div class="btn-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+          <span>АЧИВКИ (БУДЕТ ПОЗЖЕ)</span>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+
+      <button class="menu-btn admin" id="admin-btn" style="display: none;" onclick="openScreen('admin-screen')">
+        <div class="btn-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>👑 ПАНЕЛЬ SKEEDPAY</span>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    <!-- ЭКРАН ТАСКОВ -->
+    <div class="screen" id="tasks-screen">
+      <div class="content-box">
+        <h2>АКТИВНЫЕ ТАСКИ</h2>
+        <p>Платформы: YouTube Shorts & TikTok</p>
+        <p>Минимум просмотров: 1,000 | Выплата: в USDT TRC20</p>
+        <input type="text" id="task-url" class="field" placeholder="Ссылка на опубликованную нарезку">
+        <button class="action-btn" onclick="submitClip()">СДАТЬ ТАСК</button>
+      </div>
+      <button class="back-btn" onclick="openScreen('menu-screen')">← НАЗАД В МЕНЮ</button>
+    </div>
+
+    <!-- ЭКРАН ПОМОЩИ -->
+    <div class="screen" id="help-screen">
+      <div class="content-box">
+        <h2>ПОДДЕРЖКА SKEEDPAY</h2>
+        <p>Опишите ваш вопрос или проблему по начислению выплат:</p>
+        <input type="text" id="support-msg" class="field" placeholder="Текст обращения...">
+        <button class="action-btn" onclick="sendSupport()">ОТПРАВИТЬ В САППОРТ</button>
+      </div>
+      <button class="back-btn" onclick="openScreen('menu-screen')">← НАЗАД В МЕНЮ</button>
+    </div>
+
+    <!-- ЭКРАН НАСТРОЕК -->
+    <div class="screen" id="settings-screen">
+      <div class="content-box">
+        <h2>НАСТРОЙКИ ВЫПЛАТ</h2>
+        <p>Адрес кошелька в сети USDT TRC20:</p>
+        <input type="text" id="wallet-field" class="field" placeholder="T..." maxlength="34">
+        <button class="action-btn" onclick="saveWallet()">СОХРАНИТЬ КОШЕЛЕК</button>
+      </div>
+      <button class="back-btn" onclick="openScreen('menu-screen')">← НАЗАД В МЕНЮ</button>
+    </div>
+
+    <!-- ЭКРАН АДМИН-ПАНЕЛИ -->
+    <div class="screen" id="admin-screen">
+      <div class="content-box">
+        <h2 style="color: #ef4444;">ПАНЕЛЬ УПРАВЛЕНИЯ SKEEDPAY</h2>
+        <p>Статистика и быстрые действия:</p>
+        <button class="action-btn" style="background:#ef4444;" onclick="adminAction('check_pending')">ПРОВЕРИТЬ ОЧЕРЕДЬ ТАСКОВ</button>
+        <button class="action-btn" style="background:#30363d;" onclick="adminAction('toggle_tex')">РЕЖИМ ТЕХРАБОТ (/tex)</button>
+      </div>
+      <button class="back-btn" onclick="openScreen('menu-screen')">← НАЗАД В МЕНЮ</button>
+    </div>
+
   </div>
 
-  <div class="card">
-    <h2>Отправить нарезку на проверку</h2>
-    <p>Поддерживаются ролики YouTube Shorts и TikTok:</p>
-    <input type="url" id="clip-url" class="input-field" placeholder="https://youtube.com/shorts/...">
-    <button class="btn" id="send-clip-btn">Отправить отчет</button>
+  <!-- ФУТЕР -->
+  <div class="footer">
+    SKEEDPAY SYSTEM 2026 • YOUTUBE SHORTS & TIKTOK
   </div>
 
   <script>
@@ -138,31 +347,54 @@
     tg.ready();
     tg.expand();
 
-    // Получаем данные о текущем пользователе из Telegram
-    const user = tg.initDataUnsafe?.user;
-    if (user && user.first_name) {
-      document.getElementById('user-badge').innerText = user.first_name;
+    const ADMIN_ID = 8272741393;
+    const currentUser = tg.initDataUnsafe?.user;
+
+    // Авторизация и бейджи
+    if (currentUser) {
+      const name = currentUser.username ? currentUser.username.toUpperCase() : (currentUser.first_name || 'USER').toUpperCase();
+      document.getElementById('username-val').innerText = name;
+
+      // Если зашел админ — показываем красную кнопку и бейдж
+      if (currentUser.id === ADMIN_ID) {
+        document.getElementById('admin-indicator').style.display = 'block';
+        document.getElementById('admin-btn').style.display = 'flex';
+      }
     }
 
-    // Отправка кошелька боту
-    document.getElementById('save-wallet-btn').addEventListener('click', () => {
-      const wallet = document.getElementById('wallet-input').value.trim();
+    function openScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+    }
+
+    function saveWallet() {
+      const wallet = document.getElementById('wallet-field').value.trim();
       if (!wallet.startsWith('T') || wallet.length !== 34) {
-        tg.showAlert('Пожалуйста, укажите корректный USDT TRC20 адрес (начинается с T, длина 34 символа).');
+        tg.showAlert('Укажите корректный адрес USDT TRC20 (начинается с T, длина 34 символа).');
         return;
       }
       tg.sendData(JSON.stringify({ type: 'save_wallet', wallet: wallet }));
-    });
+    }
 
-    // Отправка клипа боту
-    document.getElementById('send-clip-btn').addEventListener('click', () => {
-      const url = document.getElementById('clip-url').value.trim();
+    function submitClip() {
+      const url = document.getElementById('task-url').value.trim();
       if (!url.includes('tiktok.com') && !url.includes('youtube.com') && !url.includes('youtu.be')) {
-        tg.showAlert('Ссылка должна вести на TikTok или YouTube Shorts.');
+        tg.showAlert('Ссылка должна быть на ролик YouTube Shorts или TikTok.');
         return;
       }
       tg.sendData(JSON.stringify({ type: 'submit_clip', url: url }));
-    });
+    }
+
+    function sendSupport() {
+      const msg = document.getElementById('support-msg').value.trim();
+      if (!msg) return;
+      tg.sendData(JSON.stringify({ type: 'support_message', text: msg }));
+    }
+
+    function adminAction(action) {
+      tg.sendData(JSON.stringify({ type: 'admin_command', action: action }));
+    }
   </script>
 </body>
 </html>
