@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SKEEDPAY SYSTEM 2026</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
@@ -39,7 +40,6 @@
       overflow-x: hidden;
     }
 
-    /* Верхняя панель */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -73,7 +73,6 @@
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
-    /* Контейнер экранов */
     .container {
       display: flex;
       flex-direction: column;
@@ -102,7 +101,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Кнопки главного меню */
     .menu-btn {
       width: 100%;
       background: var(--card-white);
@@ -138,7 +136,6 @@
       stroke-width: 2.5;
     }
 
-    /* Неактивная плашка */
     .menu-btn.disabled {
       background: var(--card-disabled);
       color: var(--text-muted);
@@ -149,14 +146,12 @@
       transform: none;
     }
 
-    /* Красная кнопка админки */
     .menu-btn.admin {
       background: var(--card-admin);
       color: var(--text-light);
       box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
     }
 
-    /* Карточки разделов */
     .content-box {
       background: #161b22;
       border: 1px solid #30363d;
@@ -178,6 +173,28 @@
       color: var(--text-muted);
       font-weight: 700;
       line-height: 1.4;
+    }
+
+    .task-item {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .task-reward {
+      color: #10b981;
+      font-size: 13px;
+      font-weight: 800;
     }
 
     .field {
@@ -223,7 +240,6 @@
       margin-top: 6px;
     }
 
-    /* Футер */
     .footer {
       text-align: center;
       padding: 18px;
@@ -236,11 +252,9 @@
 </head>
 <body>
 
-  <!-- ВЕРХНЯЯ СТРОКА -->
   <div class="top-bar">
     <div class="user-pill" id="user-display">
-      TG: <span id="username-val">UNDERWATER4</span>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      TG: <span id="username-val">ГОСТЬ</span>
     </div>
     <div class="admin-pill" id="admin-indicator" style="display: none;">ADMIN SKEEDPAY</div>
   </div>
@@ -249,7 +263,7 @@
 
     <!-- ГЛАВНОЕ МЕНЮ -->
     <div class="screen active" id="menu-screen">
-      <button class="menu-btn" onclick="openScreen('tasks-screen')">
+      <button class="menu-btn" onclick="openScreen('tasks-screen'); loadTasks();">
         <div class="btn-left">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
           <span>ТАСКИ</span>
@@ -293,11 +307,16 @@
     <!-- ЭКРАН ТАСКОВ -->
     <div class="screen" id="tasks-screen">
       <div class="content-box">
-        <h2>АКТИВНЫЕ ТАСКИ</h2>
-        <p>Платформы: YouTube Shorts & TikTok</p>
-        <p>Минимум просмотров: 1,000 | Выплата: в USDT TRC20</p>
-        <input type="text" id="task-url" class="field" placeholder="Ссылка на опубликованную нарезку">
-        <button class="action-btn" onclick="submitClip()">СДАТЬ ТАСК</button>
+        <h2>СПИСОК ТАСКОВ</h2>
+        <div id="tasks-list" style="display:flex; flex-direction:column; gap:10px;">
+          <p>Загрузка задач...</p>
+        </div>
+      </div>
+
+      <div class="content-box">
+        <h2>СДАТЬ ТАСК</h2>
+        <input type="text" id="task-url" class="field" placeholder="Ссылка на YouTube Shorts / TikTok">
+        <button class="action-btn" onclick="submitClip()">ОТПРАВИТЬ ОТЧЕТ</button>
       </div>
       <button class="back-btn" onclick="openScreen('menu-screen')">← НАЗАД В МЕНЮ</button>
     </div>
@@ -306,9 +325,9 @@
     <div class="screen" id="help-screen">
       <div class="content-box">
         <h2>ПОДДЕРЖКА SKEEDPAY</h2>
-        <p>Опишите ваш вопрос или проблему по начислению выплат:</p>
-        <input type="text" id="support-msg" class="field" placeholder="Текст обращения...">
-        <button class="action-btn" onclick="sendSupport()">ОТПРАВИТЬ В САППОРТ</button>
+        <p>Напишите ваш вопрос, мы ответим в личные сообщения бота:</p>
+        <input type="text" id="support-msg" class="field" placeholder="Текст вопроса...">
+        <button class="action-btn" onclick="sendSupport()">ОТПРАВИТЬ</button>
       </div>
       <button class="back-btn" onclick="openScreen('menu-screen')">← НАЗАД В МЕНЮ</button>
     </div>
@@ -317,27 +336,27 @@
     <div class="screen" id="settings-screen">
       <div class="content-box">
         <h2>НАСТРОЙКИ ВЫПЛАТ</h2>
-        <p>Адрес кошелька в сети USDT TRC20:</p>
+        <p>Адрес кошелька USDT TRC20 (начинается с T):</p>
         <input type="text" id="wallet-field" class="field" placeholder="T..." maxlength="34">
-        <button class="action-btn" onclick="saveWallet()">СОХРАНИТЬ КОШЕЛЕК</button>
+        <button class="action-btn" onclick="saveWallet()">СОХРАНИТЬ</button>
       </div>
       <button class="back-btn" onclick="openScreen('menu-screen')">← НАЗАД В МЕНЮ</button>
     </div>
 
-    <!-- ЭКРАН АДМИН-ПАНЕЛИ -->
+    <!-- ЭКРАН АДМИНКИ -->
     <div class="screen" id="admin-screen">
       <div class="content-box">
-        <h2 style="color: #ef4444;">ПАНЕЛЬ УПРАВЛЕНИЯ SKEEDPAY</h2>
-        <p>Статистика и быстрые действия:</p>
-        <button class="action-btn" style="background:#ef4444;" onclick="adminAction('check_pending')">ПРОВЕРИТЬ ОЧЕРЕДЬ ТАСКОВ</button>
-        <button class="action-btn" style="background:#30363d;" onclick="adminAction('toggle_tex')">РЕЖИМ ТЕХРАБОТ (/tex)</button>
+        <h2 style="color: #ef4444;">СОЗДАТЬ НОВЫЙ ТАСК</h2>
+        <input type="text" id="admin-task-title" class="field" placeholder="Название (например: Стрим 22.09)">
+        <input type="text" id="admin-task-reward" class="field" placeholder="Оплата (например: 5 USDT / 10k)">
+        <input type="text" id="admin-task-desc" class="field" placeholder="Условия (звук, теги и т.д.)">
+        <button class="action-btn" style="background:#ef4444;" onclick="adminCreateTask()">ОПУБЛИКОВАТЬ ДЛЯ ВСЕХ</button>
       </div>
       <button class="back-btn" onclick="openScreen('menu-screen')">← НАЗАД В МЕНЮ</button>
     </div>
 
   </div>
 
-  <!-- ФУТЕР -->
   <div class="footer">
     SKEEDPAY SYSTEM 2026 • YOUTUBE SHORTS & TIKTOK
   </div>
@@ -347,15 +366,18 @@
     tg.ready();
     tg.expand();
 
+    // ПОДКЛЮЧЕНИЕ К SUPABASE:
+    const SUPABASE_URL = "https://ujfuzgkulripndfbstpe.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_bfpyCIvH25Ela7gNueiSvQ_y4hB-5kR";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     const ADMIN_ID = 8272741393;
     const currentUser = tg.initDataUnsafe?.user;
 
-    // Авторизация и бейджи
     if (currentUser) {
       const name = currentUser.username ? currentUser.username.toUpperCase() : (currentUser.first_name || 'USER').toUpperCase();
       document.getElementById('username-val').innerText = name;
 
-      // Если зашел админ — показываем красную кнопку и бейдж
       if (currentUser.id === ADMIN_ID) {
         document.getElementById('admin-indicator').style.display = 'block';
         document.getElementById('admin-btn').style.display = 'flex';
@@ -368,32 +390,92 @@
       if (target) target.classList.add('active');
     }
 
-    function saveWallet() {
-      const wallet = document.getElementById('wallet-field').value.trim();
-      if (!wallet.startsWith('T') || wallet.length !== 34) {
-        tg.showAlert('Укажите корректный адрес USDT TRC20 (начинается с T, длина 34 символа).');
+    async function loadTasks() {
+      const listEl = document.getElementById('tasks-list');
+      listEl.innerHTML = '<p>Загрузка задач...</p>';
+
+      const { data, error } = await supabase.from('tasks').select('*').order('id', { ascending: false });
+      
+      if (error || !data || data.length === 0) {
+        listEl.innerHTML = '<p style="color:var(--text-muted)">Сейчас нет активных тасков.</p>';
         return;
       }
-      tg.sendData(JSON.stringify({ type: 'save_wallet', wallet: wallet }));
+
+      listEl.innerHTML = '';
+      data.forEach(task => {
+        const item = document.createElement('div');
+        item.className = 'task-item';
+        item.innerHTML = `
+          <div class="task-title">${task.title}</div>
+          <div class="task-reward">💰 ${task.reward}</div>
+          <p style="font-size:12px; color:#8b949e;">${task.description || ''}</p>
+        `;
+        listEl.appendChild(item);
+      });
     }
 
-    function submitClip() {
+    async function adminCreateTask() {
+      const title = document.getElementById('admin-task-title').value.trim();
+      const reward = document.getElementById('admin-task-reward').value.trim();
+      const desc = document.getElementById('admin-task-desc').value.trim();
+
+      if (!title || !reward) {
+        tg.showAlert('Заполните название и оплату!');
+        return;
+      }
+
+      const { error } = await supabase.from('tasks').insert([{ title, reward, description: desc }]);
+      if (error) {
+        tg.showAlert('Ошибка сохранения: ' + error.message);
+      } else {
+        tg.showAlert('Таск успешно создан и опубликован!');
+        document.getElementById('admin-task-title').value = '';
+        document.getElementById('admin-task-reward').value = '';
+        document.getElementById('admin-task-desc').value = '';
+        openScreen('tasks-screen');
+        loadTasks();
+      }
+    }
+
+    async function submitClip() {
       const url = document.getElementById('task-url').value.trim();
       if (!url.includes('tiktok.com') && !url.includes('youtube.com') && !url.includes('youtu.be')) {
         tg.showAlert('Ссылка должна быть на ролик YouTube Shorts или TikTok.');
         return;
       }
-      tg.sendData(JSON.stringify({ type: 'submit_clip', url: url }));
+
+      const userId = currentUser ? currentUser.id : 0;
+      const username = currentUser ? currentUser.username : 'unknown';
+
+      const { error } = await supabase.from('submissions').insert([
+        { user_id: userId, username: username, clip_url: url }
+      ]);
+
+      if (error) {
+        tg.showAlert('Ошибка отправки: ' + error.message);
+      } else {
+        tg.showAlert('Таск успешно сдан на проверку!');
+        document.getElementById('task-url').value = '';
+        tg.sendData(JSON.stringify({ type: 'clip_submitted', url: url }));
+      }
+    }
+
+    function saveWallet() {
+      const wallet = document.getElementById('wallet-field').value.trim();
+      if (!wallet.startsWith('T') || wallet.length !== 34) {
+        tg.showAlert('Укажите корректный USDT TRC20 адрес.');
+        return;
+      }
+      tg.sendData(JSON.stringify({ type: 'save_wallet', wallet: wallet }));
+      tg.showAlert('Кошелек сохранен!');
     }
 
     function sendSupport() {
       const msg = document.getElementById('support-msg').value.trim();
       if (!msg) return;
       tg.sendData(JSON.stringify({ type: 'support_message', text: msg }));
-    }
-
-    function adminAction(action) {
-      tg.sendData(JSON.stringify({ type: 'admin_command', action: action }));
+      tg.showAlert('Сообщение отправлено!');
+      document.getElementById('support-msg').value = '';
     }
   </script>
 </body>
